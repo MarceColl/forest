@@ -1,0 +1,39 @@
+---
+import { getEntry } from 'astro:content';
+let { name, text } = Astro.props;
+
+type Props = { name: string, text?: string };
+
+const note = await getEntry('note', name);
+
+if (!text) {
+  text = note.data.title.trim().toLowerCase();
+}
+---
+
+<a href={`/note/${name}`}
+   hx-get={`/note/${name}`}
+   hx-target="closest .note"
+   hx-select=".note"
+   hx-swap="afterend scroll:bottom">{text}</a>
+
+<style>
+a {
+    border: 1px dashed var(--accent);
+    padding: 1px 3px;
+    text-decoration: none;
+    font-variant: small-caps;
+
+    &::before {
+        content: "";
+    }
+
+    &::after {
+        content: "";
+    }
+
+    &:hover {
+        border-color: var(--accent-hl);
+    }
+}
+</style>

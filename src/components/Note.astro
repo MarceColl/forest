@@ -1,0 +1,51 @@
+---
+import { getEntry } from 'astro:content';
+const { name } = Astro.props;
+
+type Props = { name: string };
+
+const note = await getEntry('note', name);
+const { Content } = await note.render();
+---
+
+<details class="note" open="true">
+  <summary>
+    <h1>{note.data.title}</h1>
+    { name != "main" && <span class="close-note" hx-get="data:text/html," hx-trigger="click" hx-target="closest .note" hx-swap="delete">[close]</span> }
+  </summary>
+  <Content />
+</details>
+
+<style>
+
+details[open] {
+    margin: 1em;
+    margin-bottom: 3em;
+}
+
+details {
+    margin: 1em;
+    margin-bottom: 0em;
+}
+
+.close-note {
+    color: var(--accent);
+
+    &:hover {
+        color: var(--accent-hl);
+    }
+}
+
+summary {
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1em;
+
+    &:first-child:first-letter {
+        color: red;
+        font-size: 2em;
+    }
+}
+</style>

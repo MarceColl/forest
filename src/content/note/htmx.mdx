@@ -1,0 +1,33 @@
+---
+title: 'HTMX'
+---
+
+[HTMX](https://htmx.org) extends the hypertext protocol for interactive webpages. This page you're using right now (if you have javascript enabled) is mostly implemented using HTMX.
+
+For example, every note link that you click is defined like this
+
+```html
+<a href={`/note/${name}`}
+   hx-get={`/note/${name}`}
+   hx-target="closest .note"
+   hx-select=".note"
+   hx-swap="afterend">{note.data.title.trim()}</a>
+```
+
+What does this mean? When someone clicks that anchor, htmx will send a `GET` request to `/note/${name}`, then it will take the `.note` element from the response (specified by `hx-select`) and put it after (specified by `hx-swap`) the closest `.note` element in the current page (specified by `hx-target`).
+
+With a couple of attributes that mostly follow existing hypertext conventions you can check implement interactive webpages in minutes.
+
+Similarly closing a note is also done through `HTMX`.
+
+```html
+<span class="close-note"
+      hx-get="data:text/html,"
+      hx-trigger="click"
+      hx-target="closest .note"
+      hx-swap="delete">
+  [close]
+</span>
+```
+
+It seems that HTMX requires a request in order to do a trigger, so the `hx-get="data:text/html` is a trick to do that without having to actually do a request.

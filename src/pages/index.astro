@@ -1,0 +1,24 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Note from '../components/Note.astro';
+import Search from "astro-pagefind/components/Search";
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
+		<script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+		<script data-goatcounter="https://analytics.dziban.net/count" async="" src="https://analytics.dziban.net/count.js"></script>
+	</head>
+	<body>
+		<Header />
+		<main>
+          <Note name="main" />
+		</main>
+	</body>
+</html>
