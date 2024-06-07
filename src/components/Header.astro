@@ -6,6 +6,9 @@ import { SITE_TITLE } from '../consts';
 <header>
 	<nav>
 		<h2><a href="/">{SITE_TITLE}</a></h2>
+		<a href="https://webring.xxiivv.com/#dziban" id="webring" target="_blank" rel="noopener">
+            <img src="https://webring.xxiivv.com/icon.white.svg" width="22" height="22" alt="XXIIVV webring"/>
+        </a>
 	</nav>
 </header>
 <style>
@@ -34,6 +37,10 @@ import { SITE_TITLE } from '../consts';
 		color: var(--black);
 		border-bottom: 4px solid transparent;
 		text-decoration: none;
+	}
+	#webring {
+	   &::after { content: ""; }
+	   &::before { content: ""; }
 	}
 	nav a.active {
 		text-decoration: none;
