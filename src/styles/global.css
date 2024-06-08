@@ -26,29 +26,6 @@ html {
     font-size: 18px;
 }
 
-@font-face {
-	font-family: 'Atkinson';
-	src: url('/fonts/atkinson-regular.woff') format('woff');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
-}
-@font-face {
-	font-family: 'Atkinson';
-	src: url('/fonts/atkinson-bold.woff') format('woff');
-	font-weight: 700;
-	font-style: normal;
-	font-display: swap;
-}
-
-@font-face {
-    font-family: 'Charter';
-    src: url('/fonts/charter-regular.woff2') format('woff');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
 body {
 	font-family: equity-text, serif;
 	font-variant-numeric: oldstyle-nums;
@@ -79,8 +56,8 @@ h1, h2, h3, h4, h5, h6 {
 	line-height: 1.2;
 }
 
-h1 { font-size: 1.7em; }
-h2 { font-size: 1.5em; }
+h1 { font-size: 1.4em; }
+h2 { font-size: 1.2em; }
 h3 { font-size: 1.3em; }
 h4 { font-size: 1.2em; }
 h5 { font-size: 1.1em; }
@@ -100,8 +77,11 @@ a {
         color: var(--accent-hl);
     }
 }
+
 p { margin-bottom: 1em; }
+
 .prose p { margin-bottom: 2em; }
+
 textarea { width: 100%; font-size: 16px; }
 input { font-size: 16px; }
 table { width: 100%; }
@@ -129,7 +109,8 @@ hr {
 }
 @media (max-width: 720px) {
 	main {
-	   margin: 1em;
+	   margin: 0.2em;
+	   padding: 0.6em;
 	}
 }
 
