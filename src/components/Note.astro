@@ -6,24 +6,50 @@ type Props = { name: string };
 
 const note = await getEntry('note', name);
 const { Content } = await note.render();
+import mushroom1 from '../../public/mushroom-01.png';
+import mushroom2 from '../../public/mushroom-02.png';
+import mushroom3 from '../../public/mushroom-03.png';
+import mushroom4 from '../../public/mushroom-04.png';
+import mushroom5 from '../../public/mushroom-05.png';
+import mushroom6 from '../../public/mushroom-06.png';
+
+const mushrooms = [
+  mushroom1,
+  mushroom2,
+  mushroom3,
+  mushroom4,
+  mushroom5,
+  mushroom6
+];
+
+const mushroom = mushrooms[Math.floor(Math.random() * mushrooms.length)]
 ---
 
-<details class="note" open="true">
-  <summary>
-    <h1>{note.data.title}</h1>
-    { name != "main" && <span class="close-note" hx-get="data:text/html," hx-trigger="click" hx-target="closest .note" hx-swap="delete">[close]</span> }
-  </summary>
-  <Content />
-</details>
+<div class="note">
+    <details open="true">
+        <summary>
+            <span>
+            <img src={mushroom.src} width="64" height="64" alt="A pixel art image of a mushroom" />
+            <h1>{note.data.title}</h1>
+            </span>
+            { name != "main" && <span class="close-note" hx-get="data:text/html," hx-trigger="click" hx-target="closest .note" hx-swap="delete">[close]</span> }
+        </summary>
+        <Content />
+    </details>
+<div>
 
 <style>
 
-details[open] {
-    margin: 1em;
-    margin-bottom: 3em;
+.note {
+    display: flex;
+    max-width: 450px;
+    min-width: 450px;
+    flex-direction: row;
+    align-items: center;
 }
 
 details {
+    width: 100%;
     margin: 1em;
     margin-bottom: 0em;
 }
@@ -36,16 +62,28 @@ details {
     }
 }
 
+img {
+    height: 64px;
+}
+
 summary {
+    position: sticky;
+    top: 0;
+    left: -30px;
+    background-color: var(--primary);
     list-style: none;
     display: flex;
+    justify-content: space-between;
     flex-direction: row;
     align-items: center;
     gap: 1em;
+    width: 450px;
+    margin-botton: 1em;
 
-    &:first-child:first-letter {
-        color: red;
-        font-size: 2em;
+    & > span {
+        display: flex;
+        align-items: center;
+        gap: 1em;
     }
 }
 </style>
