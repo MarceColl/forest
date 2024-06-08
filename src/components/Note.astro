@@ -43,7 +43,6 @@ const mushroom = mushrooms[Math.floor(Math.random() * mushrooms.length)]
 .note {
     display: flex;
     max-width: 450px;
-    min-width: 450px;
     flex-direction: row;
     align-items: center;
 }
@@ -77,7 +76,7 @@ summary {
     flex-direction: row;
     align-items: center;
     gap: 1em;
-    width: 450px;
+    max-width: 450px;
     margin-botton: 1em;
 
     & > span {
