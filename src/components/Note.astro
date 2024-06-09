@@ -36,29 +36,29 @@ const mushroom = mushrooms[Math.floor(Math.random() * mushrooms.length)]
     <details open="true">
         <summary>
             <span>
-            <img class="mushroom-header" src={mushroom.src} width="64" height="70" alt="A pixel art image of a mushroom" />
-            <h1>{note.data.title}</h1>
+                <img class="mushroom-header" src={mushroom.src} width="64" height="70" alt="A pixel art image of a mushroom" />
+                <h1>{note.data.title}</h1>
             </span>
             { !initial && <span class="close-note" hx-get="data:text/html," hx-trigger="click" hx-target="closest .note" hx-swap="delete">[close]</span> }
         </summary>
-        <Content />
-        { backlinks &&
-         <div>
-          <h3>Backlinks</h3>
-          <div class="backlinks">
-          { backlinks.filter(item => item).map((item) => (
-           <L name={item} isBacklink={true} />
-           ))}
-          </div>
-         </div>
-        }
+        <div class="content">
+            <Content />
+            { backlinks.length > 0 &&
+             <div>
+              <h3>Backlinks</h3>
+              <div class="backlinks">
+              { backlinks.filter(item => item).map((item) => (
+               <L name={item} isBacklink={true} />
+               ))}
+              </div>
+             </div>
+            }
+        </div>
     </details>
 <div>
 
 <style>
-.mushroom-top {
-    display: none;
-}
+.mushroom-top { display: none; }
 
 .backlinks {
     display: flex;
@@ -113,10 +113,16 @@ summary {
         display: flex;
         align-items: center;
         gap: 3em;
+    }
+}
 
-        & > h1 {
-            margin: -1.4em;
-        }
+svg {
+    fill: var(--accent);
+    position: relative;
+    right: -20px;
+
+    &:hover {
+        fill: var(--accent-hl);
     }
 }
 
@@ -131,11 +137,21 @@ summary {
 
     summary {
         justify-content: center;
+        flex-direction: column;
+        gap: 0;
 
         & > span {
             flex-direction: column;
             justify-content: center;
-            gap: 0em;
+            gap: 0;
+
+            & > h1 {
+                margin: 0.8em;
+            }
+        }
+
+        & .close-note {
+            margin-bottom: 0.4em;
         }
     }
 }
