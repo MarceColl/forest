@@ -79,9 +79,38 @@ At each point in time the program is a tuple database that can be queried. The t
 ## Questions and Doubts
 
 + Is the order of matches specified? (Top to bottom of file?), since two rules may match at the same time and be contradicting.
++ What happens when the same rule is matched by several tuples? Is the rule applied for all of them?
 + What kind of tooling would work for debugging this?
   + A time traveller debugger should be very simple to implement.
 + Abstracting
   + Was wondering about a way to specify what incrementing a value is. So for example you say:
   `Increment %val: %val = %val + 1`, I'm using `%` to target the value itself (does this even make sense?). Then for the example above you could do `Increment is clicked, The counter is at $count: Increment $count`. This would leave the tuple intact and just modify the value. Without having to re-implement what incrementing is for everything that can be incremented in the program.
 + Is there a need/space for metaprogramming?
+
+
+(wryl) in the thread says
+
+> If I wanted to store an array, for example, I can store it in the form..
+>
+> $array-name @ $index = $value
+>
+> So..
+>
+> foo @ 1 = 10,
+>
+> foo @ 2 = 20,
+>
+> foo @ 3 = 30.
+>
+> I can now ask questions, via patterns, such as "what arrays contain the value 20, and at what indices?".
+
+I'm not sure how that would work? I guess the environment he has created allows for queries that do not modify the environment. Leveraging the same pattern matching as the match defintions but one that returns multiple values.
+
+```
+$table @ $idx = 20
+
+Found 3 matches
+($table=foo, $idx=2)
+($table=bar, $idx=34)
+($table=baz, $idx=1)
+```
