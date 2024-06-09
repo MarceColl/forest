@@ -1,0 +1,45 @@
+---
+title: 'Backlinks'
+---
+
+import L from '../../components/L.astro'
+
+Backlinks are a way to show what links to the current page, when building this <L name="digital-forest" from="backlinks" /> I wanted to have a way to know what links to the current page. This is useful because it provides a bi-directional way to navigate the forest. If page A links to page B, B is probably related to A even if it doesn't mention it explicitly, it creates more opportinities to discover information that may interest you.
+
+## Implementation
+
+<L name="astro" from="backlinks" /> doesn't provide a way to backlink and it is not built in a way that makes it super easy but I arrived at a bit of a hack that works pretty well.
+
+I have a `Note` component that renders notes and a `L` component that allows me to link to other notes, I use that to build the <L name="htmx" from="backlinks" /> properties that allow this site interactivity.
+
+Inside of the `L` component I save in a dictionary that page A linked to page B, then at the time of rendering a Note I can just pull that information and build the backlinks.
+
+However Notes are built as they appear, so we cannot make sure that we have gathered all pages that link to page B when rendering page B. In order to force a pre-computation I added a type of page that is never shown to the user in `pages/note/1precompute`, this renders all Notes. Once it has finished rendering the whole backlinks table has been built and now we can render the actual pages this time with all the backlink information already pre-computed!
+
+The code is very simple
+
+```javascript
+const backlinks = {};
+
+export function addLink(from, to) {
+  let fromList = backlinks[to];
+
+  if (fromList) {
+    fromList.add(from);
+  } else {
+    backlinks[to] = new Set([from]);
+  }
+}
+
+export function getBacklinks(to) {
+  const bl = backlinks[to];
+
+  if (bl) {
+    return [...bl];
+  } else {
+    return [];
+  }
+}
+```
+
+Then in the `L` component I just call `addLink(from, name)`. You can then use `getBacklinks` to fetch the backlinks for a particular page and render them however you want.
