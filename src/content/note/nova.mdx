@@ -1,0 +1,67 @@
+---
+title: 'Nova'
+---
+
+import L from '../../components/L.astro'
+
+Nova is a <L name="programming-language" from="nova" /> invented by [(wryl)](https://merveilles.town/@wryl).
+
+You can see an exchange talking about this starting [here](https://elk.zone/functional.cafe/@wryl@merveilles.town/112571072480996408).
+
+It's a very interesting language where you build facts, a bit like Prolog or a Knowledge Graph. Then you pattern match on those facts in order to advance the computation.
+
+Under the language you have an unordered set of n-tuples, then you pattern match on those in order to advance the computation.
+
+For example, let's say you want to have a program that maintains a counter, you start with something like this:
+
+```
+Increment was clicked,
+The counter is at $count:
+  $new_count = $count + 1,
+  The counter is at $new_count.
+
+Decrement was clicked,
+The counter is at $count:
+  $new_count = $count - 1,
+  The counter is at $new_count.
+
+The counter is at 0.
+```
+
+I don't have access to the implementation or any programs beyond some [examples](https://gitlab.com/-/snippets/3716812), so the following is pure speculation.
+
+## Underlying computation mechanism
+
+The statements on the above language serve two different functions:
+
+```
+Increment was clicked,
+The counter is at $count:
+  $new_count = $count + 1,
+  The counter is at $new_count.
+```
+
+This specifies that if at any time, the tuple `(Increment, was, clicked)`
+exists in the tuple database, and the tuple `(The, counter, is, at, _)`
+exists, then consume them and replace them with `(The, counter, is, at, _)` with a new value.
+
+If a token that starts with `$` is found in the precondition then that name becomes a variable that takes the value found in the tuple.
+
+For example, if the tuple database contained
+```
+Tuple 1: (Increment, was, clicked)
+Tuple 2: (The, counter, is, at, 4)
+```
+
+Then running that computation is something like:
+```
+delete (Increment, was, clicked)
+delete (The, counter, is, at, _)
+$count = 4
+$new_count = 5 ($count + 1)
+insert (The, counter, is, at, 5)
+```
+
+Given two operations `delete` and `insert` that operate on the tuple database.
+
+This is very interesting and is a new way of specifying a computation for me. I want to explore this further. This could relate very well with the <L name="explorative-programming" from="nova" /> concept. It would offer very good introspection and iteration, which are fundamental for that.
