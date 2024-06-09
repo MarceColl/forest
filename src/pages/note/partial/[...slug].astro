@@ -1,8 +1,8 @@
 ---
-import BlogPost from '../layouts/MySiteLayout.astro';
+import BlogPost from '../../layouts/MySiteLayout.astro';
 import { getCollection } from 'astro:content';
-import Note from '../../components/Note.astro';
-import Base from '../../layouts/base.astro';
+import Note from '../../../components/Note.astro';
+import Base from '../../../layouts/base.astro';
 
 // 1. Generate a new path for every collection entry
 export async function getStaticPaths() {
@@ -16,6 +16,4 @@ export async function getStaticPaths() {
 const { slug } = Astro.props;
 ---
 
-<Base>
-    <Note name={slug} initial={true} />
-</Base>
+<Note name={slug} initial={false} />

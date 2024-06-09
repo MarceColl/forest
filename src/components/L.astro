@@ -1,10 +1,15 @@
 ---
 import { getEntry } from 'astro:content';
-let { name, text } = Astro.props;
+import { addLink } from '../backlinks';
+let { name, text, from, isBacklink } = Astro.props;
 
+isBacklink = isBacklink == undefined ? false : isBacklink;
 type Props = { name: string, text?: string };
 
 const note = await getEntry('note', name);
+if (!isBacklink) {
+  addLink(from, name);
+}
 
 if (!text) {
   text = note.data.title.trim().toLowerCase();
@@ -12,7 +17,7 @@ if (!text) {
 ---
 
 <a href={`/note/${name}`}
-   hx-get={`/note/${name}`}
+   hx-get={`/note/partial/${name}`}
    hx-target="closest .note"
    hx-select=".note"
    hx-swap="afterend scroll:bottom">{text}</a>
