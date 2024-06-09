@@ -100,8 +100,12 @@ li {
 blockquote {
     border-left: 4px solid var(--accent);
 	padding: 0 0 0 20px;
-	margin: 0px;
-	font-size: 1.333em;
+	margin: 2em;
+	font-size: 1em;
+
+	& > p {
+	  margin: 0.4em;
+	}
 }
 hr {
 	border: none;
