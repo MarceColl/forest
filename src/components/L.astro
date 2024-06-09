@@ -7,7 +7,9 @@ isBacklink = isBacklink == undefined ? false : isBacklink;
 type Props = { name: string, text?: string };
 
 const note = await getEntry('note', name);
-addLink(from, name);
+if (!isBacklink) {
+  addLink(from, name);
+}
 
 if (!text) {
   text = note.data.title.trim().toLowerCase();

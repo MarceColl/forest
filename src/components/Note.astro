@@ -10,7 +10,7 @@ type Props = { name: string, initial: boolean };
 
 const note = await getEntry('note', name);
 const backlinks = getBacklinks(name);
-console.log(backlinks);
+console.log(`BL FOR ${name}: ${backlinks}`);
 const { Content } = await note.render();
 import mushroom1 from '../../public/mushroom-01.png';
 import mushroom2 from '../../public/mushroom-02.png';
@@ -115,7 +115,7 @@ summary {
         gap: 1em;
 
         & > h1 {
-            margin: 0.4em;
+            margin: -1.4em;
         }
     }
 }
