@@ -49,8 +49,8 @@ If a token that starts with `$` is found in the precondition then that name beco
 
 For example, if the tuple database contained
 ```
-Tuple 1: (Increment, was, clicked)
-Tuple 2: (The, counter, is, at, 4)
+(Increment, was, clicked)
+(The, counter, is, at, 4)
 ```
 
 Then running that computation is something like:
@@ -65,3 +65,23 @@ insert (The, counter, is, at, 5)
 Given two operations `delete` and `insert` that operate on the tuple database.
 
 This is very interesting and is a new way of specifying a computation for me. I want to explore this further. This could relate very well with the <L name="explorative-programming" from="nova" /> concept. It would offer very good introspection and iteration, which are fundamental for that.
+
+## Internal representation
+
+Since tuples are always parsed left to right until end of line (I think). Probably the fastest easiest representation is to just have a tree of tuple values.
+
+Since you know what tuples have been added it should be easy to check which rules may be affected by them and match on those.
+
+## Program as a database
+
+At each point in time the program is a tuple database that can be queried. The tuple database is evolved atomically on each match.
+
+## Questions and Doubts
+
++ Is the order of matches specified? (Top to bottom of file?), since two rules may match at the same time and be contradicting.
++ What kind of tooling would work for debugging this?
+  + A time traveller debugger should be very simple to implement.
++ Abstracting
+  + Was wondering about a way to specify what incrementing a value is. So for example you say:
+  `Increment %val: %val = %val + 1`, I'm using `%` to target the value itself (does this even make sense?). Then for the example above you could do `Increment is clicked, The counter is at $count: Increment $count`. This would leave the tuple intact and just modify the value. Without having to re-implement what incrementing is for everything that can be incremented in the program.
++ Is there a need/space for metaprogramming?
