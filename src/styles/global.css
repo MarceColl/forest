@@ -65,14 +65,6 @@ strong, b { font-weight: 700; }
 a {
     color: var(--accent);
 
-    &::before {
-        content: "{";
-    }
-
-    &::after {
-        content: "}";
-    }
-
     &:hover {
         color: var(--accent-hl);
     }
