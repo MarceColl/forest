@@ -70,7 +70,14 @@ a {
     }
 }
 
-p { margin-bottom: 1em; }
+p {
+    margin-bottom: 1em;
+    hyphens: auto;
+}
+
+pre {
+    font-size: 0.8em;
+}
 
 .prose p { margin-bottom: 2em; }
 
@@ -80,7 +87,8 @@ table { width: 100%; }
 img { max-width: 100%; height: auto; border-radius: 8px; }
 code {
     padding: 2px 5px;
-    background-color: var(--tertiary);
+    background-color: var(--secondary);
+    font-size: 0.8em;
     border-radius: 2px;
 }
 pre { padding: 1.5em; border-radius: 8px; }
@@ -94,6 +102,7 @@ blockquote {
 	padding: 0 0 0 20px;
 	margin: 2em;
 	font-size: 1em;
+	color: var(--accent);
 
 	& > p {
 	  margin: 0.4em;
