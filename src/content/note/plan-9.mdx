@@ -1,0 +1,66 @@
+---
+title: 'Plan 9'
+---
+
+import L from '../../components/L.astro'
+
+
+You can use Plan 9 in Linux (and other operating systems) by using the [Plan 9 from User Space](https://9fans.github.io/plan9port/) distribution.
+
+In `NixOS` you can use the `plan9port` package.
+
+After installing you'll have the `9` binary to interact with the Plan 9 binaries. For example:
+
+`9 acme` opens <L name='acme' from='plan-9' />, the plan 9 text editor. Plan 9 programs are strange to LInux users because they expose filesystems, for example acme exposes an acme filesystem with the content of all its buffers, plus some control data.
+
+This allows you to extend the program with whatever you need, it's a pretty unique proposition. Using the `9` executable you can check this, for example for buffer 4 I could do. <L name='explorative-programming' from='plan-9' />
+
+```sh
+$ 9 9p -a '<addr>' read /4/body
+---
+title: 'Plan 9'
+---
+
+You can use Plan 9...
+```
+
+For example, I edit my notes using acme with a couple of scripts, one called note-link, that is basically just this
+
+```sh
+#!/bin/sh
+
+NAME=$(cat)
+printf "<L name='$NAME' from='' />"
+```
+
+Whatever I have selected in acme, I run the note-link command and it creates a link to it.
+
+Then I have another script that if I have selected the name of a note either opens me the note, or creates the note if it doesn't exist and then opens it. It's also a very simple script
+
+```sh
+addr='unix!/tmp/ns.marcecoll.:0/acme'
+
+NAME=$(cat)
+
+function p {
+	9 9p -a $addr $@
+}
+
+file="/home/marcecoll/proj/blog/blog/src/content/note/$NAME.mdx"
+
+if [ ! -f "$file" ] 
+then
+cat > $file << NOTE 
+---
+title: '$NAME'
+---
+
+import L from '../../components/L.astro'
+
+NOTE
+
+fi
+
+printf "name $file\nget" | p write /new/ctl
+printf "$NAME"
+```

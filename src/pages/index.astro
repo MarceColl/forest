@@ -5,17 +5,19 @@ import Footer from '../components/Footer.astro';
 import Note from '../components/Note.astro';
 import Search from "astro-pagefind/components/Search";
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import mush from '../../public/mushroom.png';
+import htmx from '../../public/htmx.min.js';
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
 	</head>
 	<body>
 		<Header />
 		<main>
+		  <img class="mushroom"src={mush.src} width="256px" height="300px" alt="A pixel art image of a mushroom" />
           <Note name="main" initial={true} />
 		</main>
 	</body>

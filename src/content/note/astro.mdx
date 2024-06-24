@@ -6,4 +6,24 @@ While I tend to dislike most Javascript frameworks, this one fit my way of think
 
 It also allows to add dynamic content if needed by seamlessly rendering some parts while bundling javascript for others. They call this system *Islands*.
 
+In order to add math rendering you can install two packages:
+```
+bun add remark-math rehype-katex
+```
+
+Then add them to the `astro.config.js` like so:
+
+```
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+
+export default defineConfig({
+	...
+	markdown: {
+		remarkPlugins: [remarkMath],
+		rehypePlugins: [rehypeKatex],
+	}
+});
+```
+
 [Website](https://astro.build/)

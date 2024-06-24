@@ -10,33 +10,15 @@ type Props = { name: string, initial: boolean };
 
 const note = await getEntry('note', name);
 const backlinks = getBacklinks(name);
-console.log(`BL FOR ${name}: ${backlinks}`);
 const { Content } = await note.render();
-import mushroom1 from '../../public/mushroom-01.png';
-import mushroom2 from '../../public/mushroom-02.png';
-import mushroom3 from '../../public/mushroom-03.png';
-import mushroom4 from '../../public/mushroom-04.png';
-import mushroom5 from '../../public/mushroom-05.png';
-import mushroom6 from '../../public/mushroom-06.png';
-
-const mushrooms = [
-  mushroom1,
-  mushroom2,
-  mushroom3,
-  mushroom4,
-  mushroom5,
-  mushroom6
-];
-
-const mushroom = mushrooms[Math.floor(Math.random() * mushrooms.length)]
+import branch from '../../public/branch.png';
 ---
 
+
 <div class="note">
-    <img class="mushroom-top"src={mushroom.src} width="64" height="70" alt="A pixel art image of a mushroom" />
     <details open="true">
         <summary>
             <span>
-                <img class="mushroom-header" src={mushroom.src} width="64" height="70" alt="A pixel art image of a mushroom" />
                 <h1>{note.data.title}</h1>
             </span>
             { !initial && <span class="close-note" hx-get="data:text/html," hx-trigger="click" hx-target="closest .note" hx-swap="delete">[close]</span> }
@@ -92,7 +74,9 @@ details[open] {
 }
 
 img {
-    height: 64px;
+    transform: rotate(90deg);
+    height: 120px;
+    width: 40px;
 }
 
 summary {

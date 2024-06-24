@@ -1,0 +1,61 @@
+---
+title: 'estartab'
+---
+
+import L from '../../components/L.astro'
+
+This is a file in <L name='plan-9' from='estartab' /> that contains star informa
+tion in a tabular format. I haven't found much information about this file in 
+the internet. And there doesn't seem to be a man page for it. Just a reference
+from the astro man page. Here is what I was able to understand from reading the 
+source of
+the plan-9 program 
+[astro](https://github.com/9fans/plan9port/blob/master/src/cmd/astro/stars.c#L39-L64).
+
+It is part of the SAO (Smithsonian Astrophysical Observatory) Star Catalog.[^1] [^2] [^3]
+The file is composed of many entries in a tabular format, here is a sample row:
+
+```
+190556      30359 21 38 58.207 -.0003 -20 02 04.87 -0.007 .00  7.06  K0
+```
+
+This corresponds to [this star](http://simbad.cds.unistra.fr/simbad/sim-basic?Ident=SAO+190556&submit=SIMBAD+search), 
+cross-referencing the line above with the values in simbad I see the estartab
+uses the <L name='fk4' from='estartab' /> coordinate system with (ep=B1950 eq=1950)
+[I'm still unsure what this means, epoch is B1950 and the equinox is 1950, but unsure
+what equinox=1950 means).
+
+From what I understand of this, an a<L name='astronomy-epoch' from='estartab' /> is a 
+particular point in time that serves as reference. In this case the epoch is B1950, which is 
+the <L name='besselian-year' from='estartab' /> 1950.
+
+Here's my attempt at understanding all of these parameters:
+
+1. `190556` is the SAO catalog ID.
+2. `30359` General catalog[^5] number. Seems it's not used by astro.
+3. `21` is called the `rah` internally, it is the hour part of the right ascension.
+4. `38` is called the `ram` internally, it is the minute part of the right ascension.
+5. `58.207` is called the `ras` internally, it is the seconds part of the right ascension.
+6. `-.0003` is called the `da`, it seems some kind of correction to the ascension.
+7. `-20` is called the `dday`, it's part of the declination. Normally would be called degrees [^4]
+8. `02` is called the `dmin`, it's part of the declination. Normally minutes.
+9. `04.87` is called the `dsec`, it's part of the declination. Normally seconds.
+10. `-0.007` is called the `dd`. It is used in `astro/star.c`. It seems some kind of correction to the declination.
+11. `.00` is the `px`. It doesn't seem to be used. Maybe related to the positional error as described in [^3]
+12. `7.06` is the `mag`. The star magnitude.
+
+In this row the <L name='right-ascension' from='estartab' /> is $21\degree 38'  58.207"$ and the
+declination is 
+
+Internally this is stored as a float variable named `alpha` computed like so:
+$$
+\alpha = \mathrm{ra_{h}} + \frac{\mathrm{ra_{m}}}{60} + \frac{\mathrm{ra_{s}}}{3600}
+$$
+
+In this case it gives a value of $21.649502$.
+
+[^1]: https://en.wikipedia.org/wiki/Smithsonian_Astrophysical_Observatory_Star_Catalog
+[^2]: http://tdc-www.harvard.edu/catalogs/sao.html
+[^3]: https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/sao.html
+[^4]: Not sure why they call it day here, just normal degrees of declination.
+[^5]: https://en.wikipedia.org/wiki/Catalogue_of_Nebulae_and_Clusters_of_Stars

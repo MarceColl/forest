@@ -1,0 +1,20 @@
+---
+let { link, type } = Astro.props;
+---
+
+<span>
+<slot />
+<sup><a href={link} target="_blank">{type}</a></sup>
+</span>
+
+<style>
+a {
+    font-variant: small-caps;
+    color: var(--accent);
+    font-size: 0.7em;
+
+    &:hover {
+        border-color: var(--accent-hl);
+    }
+}
+</style>

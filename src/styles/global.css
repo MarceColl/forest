@@ -5,7 +5,7 @@
  */
 
 :root {
-    --primary: #2f3e46;
+    --primary: #0b2431;
     --secondary: #354f52;
     --tertiary: #52796f;
     --content: #faf7ee;
@@ -21,8 +21,10 @@
 }
 
 html {
+    background-color: #0b2431;
     background-color: var(--primary);
-	color: var(--content);
+    color: #faf7ee;
+    color: var(--content);
     font-size: 18px;
 }
 
@@ -33,6 +35,7 @@ body {
 	font-size: 0.98rem;
 
 	margin: 0;
+	margin-left: 20px;
 	padding: 0;
 	text-align: left;
 	background-size: 100% 600px;
@@ -63,9 +66,11 @@ h4 { font-size: 1.2em; }
 h5 { font-size: 1.1em; }
 strong, b { font-weight: 700; }
 a {
+    color: #f2b096;
     color: var(--accent);
 
     &:hover {
+        color: #d36135;
         color: var(--accent-hl);
     }
 }
@@ -87,6 +92,7 @@ table { width: 100%; }
 img { max-width: 100%; height: auto; border-radius: 8px; }
 code {
     padding: 2px 5px;
+    background-color: #354f52;
     background-color: var(--secondary);
     font-size: 0.8em;
     border-radius: 2px;
@@ -143,6 +149,8 @@ hr {
     font-variant: small-caps;
     color: var(--accent);
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200..900&display=swap');
 
 @font-face {
 font-family: equity-text;
