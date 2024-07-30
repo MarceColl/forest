@@ -52,3 +52,33 @@ Once we emit those events we just need to know that object_id A had a modificati
 
 This states that at line 12 in file.rb, object with id 543234 was modified to this new value. The value is
 the Base64 encoded output of `Marshal.dump(obj)`.
+
+## Marshaling
+
+For now I'm using the `Marshal` module, however, I think ideally we would only marshal the top level object, and then store references to nested objects and then store those. That way we have more granular changes.
+
+Since we know exactly what was modified at the object level we need to know everything that references that object.
+
+So, let's say you have a hash with obj_id 12, that contains another hash of obj_id 14. Something like this:
+
+```ruby
+h = { "a" => { "b" => true }}
+```
+
+This would be stored internally as something like this:
+
+```json
+{ "obj_id: 12, "obj": "{ 'a': { ref: 14 }}" }
+{ "obj_id: 14, "obj": "{ 'b': true }" }
+```
+
+So when object with obj_id 14 is modified
+
+```ruby
+h['a']['b'] = false
+```
+
+We will receive an event that says that it has been modified and we will know
+exactly what value the top level parents have.
+
+
