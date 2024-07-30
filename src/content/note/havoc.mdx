@@ -1,0 +1,25 @@
+---
+title: 'Havoc'
+---
+
+import L from '../../components/L.astro'
+
+
+havoc is a <L name='fuzzing' from='havoc' /> strategy basically repeats the following steps:
+
+* Check if an input uncovers a new path in the program
+* If it doesn't, discard it
+* If it does apply several mutations to create a new set of mutants
+
+Repeat.
+
+There are several mutation operators
+
+* bitflip
+* hard-coded interesting values
+* arithmetic increase
+* arithmeetic decrease
+* random value
+* delete bytes
+* clone/insert bytes
+* overwrite bytes

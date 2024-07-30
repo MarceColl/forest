@@ -1,0 +1,54 @@
+---
+title: 'Ruby Time Travel debugger'
+---
+
+import L from '../../components/L.astro'
+
+
+I'm currently building a Ruby time travel debugger, the idea is that you can trace a part of code
+or a particular request and you have the whole execution recorded and can examine it forwards and
+backwards when needed.
+
+The first very naive approach is to use the `TracePoint` interface to record every line/call/return
+and marshal those items. (Started with `as_json`, now using the `Marshal` module instead).
+
+This quickly becomes very impractical, with multi-gigabyte traces and 200x overhead. I was currently
+generating an object marshaling for every variable (instance, local, class, etc) on every line execution.
+
+I'm currently experimenting with some custom tracepoint events on bytecode instructions instead of
+on line change. The idea is to emit an event when one of the `*set*` instructions are called since
+those are the ones that modify something. Then whatever was modified is passed as an event argument
+and we just marshal those relating them to their `object_id`.
+
+I hate that I have to modify the ruby interpreter for this however, I need to investigate if I can
+do something similar without having to resort to that.
+
+
+## `*set*` instructions
+
+There are several set instructions:
+
+* `setlocal`, sets a local variable, local variables are referenced by index (VALUE index in the stack)
+and level (on what nested stack the variable is)
+* `setblockparam`, sets a block parameter value, also by indexx and level
+* `setspecial`, sets a special local variable (`$~`, `$_`, etc), by key
+* `setinstancevariable`, sets an instance variable, takes an `id` (object id?), and the instance variable descriptor (?)
+* `setclassvariable`, sets a class variable, takes an `id` and class variable descriptor (?)
+* `setconstant`
+* `setglobal`
+
+These above are all the basic opcodes that modify the state, then we have the `opt_` opcodes, they
+are optimizations for very common combinations of opcodes into one faster opcode.
+* `opt_aset`, for things like `recv[any_obj] = new_val`
+* `opt_aset_with`, for things like `recv[str] = new_val`, same as above when the obj is a string
+ 
+These are all the operations that we care about and that we want to capture.
+
+Once we emit those events we just need to know that object_id A had a modification, and create a trace that looks like this:
+
+```json
+{ trace_id: 123, obj_id: 534234, obj: "BAh7BkkiCWhvbGEGOgZFVGkR", lineno: 12, path: "file.rb" }
+```
+
+This states that at line 12 in file.rb, object with id 543234 was modified to this new value. The value is
+the Base64 encoded output of `Marshal.dump(obj)`.

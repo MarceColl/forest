@@ -1,0 +1,21 @@
+---
+title: 'acme'
+---
+
+import L from '../../components/L.astro'
+
+* [https://docs.ruby-lang.org/en/master/contributing/building_ruby_md.html](Reference)
+
+It needs openssl, libyaml, zlib, autoconf.
+
+```sh
+$ git clone https://github.com/ruby/ruby.git
+$ ./autogen.sh
+$ mkdir build && cd build
+$ mkdir ~/.rubies
+$ ../configure --prefix="${HOME}/.rubies/ruby-master"
+$ make
+$ make install
+```
+
+Weirdly enough, `make` doesn't build all the binaries, you need to run `make install` in order to have all the normal ruby binaries (irb, bundler, gem, etc).
