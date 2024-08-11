@@ -1,0 +1,29 @@
+---
+title: 'Hako'
+---
+
+import L from '../../components/L.astro'
+
+This explores the idea of replacing a traditional relational database
+with a raft replicated arbitrary metadata store.
+
+You don't need an ORM if everything is an object already!
+
+This is very much in sync with the <L name="explorative-programming" from="hako" /> ideas.
+
+I've decided to explore this idea in Elixir due to two reasons:
+
+* Everything in elixir is serializable, everything is immutable by default, you can take any object and send it over the wire, including functions.
+* Availability of a high quality, robust Raft library with on-disk persistance backed by a WAL -> [`Ra` library](https://github.com/rabbitmq/ra).
+
+
+The idea is to be able to just write data structures and freely replicate them over a cluster of nodes, even if it's only one node. And persist them into disk safely.
+
+This allows you to build Elixir applications WITHOUT a database.
+
+This follows a bit on the ideas of [this post](https://blog.screenshotbot.io/2024/08/10/building-a-highly-available-web-service-without-a-database/) ([HN discussion](https://news.ycombinator.com/item?id=41206908)).
+
+Everyone there thought it was a dumb idea, but I like it and I think it's nice to test the boundaries of what is now considered *best practices*. Since most of the foundational work is done by the `Ra` library I can focus on the ergonomics of working with an object distributed database.
+
+TO BE CONTINUED!
+

@@ -2,6 +2,14 @@
 title: 'Elixir Benchmarks'
 ---
 
+import L from '../../components/L.astro'
+
+Here are some benchmarks about how expensive is to update/modify a Map in Elixir,
+with three sizes.
+
+This was done in the context of implementing a Raft-backed prototyping database
+based on the [`Ra` library](https://github.com/rabbitmq/ra).
+
 ```elixir
   def large_maps_benchmark do
     Benchee.run(
