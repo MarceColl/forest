@@ -1,0 +1,80 @@
+---
+title: 'Kifu Search'
+---
+
+import L from '../../components/L.astro'
+
+I'm working on a position searcher for Go kifus (game registry). The idea is to be able to search all professional and
+Fox games.
+
+The current design is a Phoenix frontend for the whole website interaction, and a super small assembly program that
+scans a big mmapped data file that contains the game data. The game data is currently stored as a 512 bit chunk inside the
+file.
+
+The chunk contains
+
+* 361 bits of stone positions (0 -> no stone, 1 -> stone), no color is encoded here.
+* up to 100 bits of color data, every 1 in the above 361 bitfield from the beggining has its color encoded here: 0 -> black, 1 -> white
+* The rest of the bits are an integer id to know which game this refers to.
+
+
+There is another possible representation I'm thinking about where we have:
+
+```
+| game_id | game_settings | moves ... |
+```
+
+This makes the scan slower, since we need a step to iterate over the moves, however it results in big space savings.
+
+With 2M games to save the first 100 moves, it would take 12.8 GB of data.
+With the second approach, to save the first 100 moves, it would take 266MB and to save all moves assuming an average 200 moves per game
+it would be half a gig. This would allow saving 100 million games using only 25GB.
+
+The small ASM program takes two things as arguments
+
+```
+$ ./search <pattern> <offset>
+```
+
+Pattern is a board pattern in string form, "0001020020100110" in a 4x4 board would be something like this:
+
+```
+...x
+.O..
+O.x.
+.xx.
+```
+
+The offset is where in the data file to start, when a search concludes and it has found 20 items, the program returns an offset (where it
+had to go to find those games), and 20 game ids.
+
+When paging, you give that offset back and it will continue to search from there.
+The 20 game ids are then mapped into their SGFs (Smart Game Format, the standard Go kifu format) and returned to the frontend for display.
+
+Preliminary tests suggest a search speed of 100GB/s using this system, which would allow a full 100 million games, in about 2.5 seconds but
+I haven't had time to do a thorough benchmark and that number seems a bit sus.
+
+The chunks are checked against the pattern using AVX2 operations, I take a pattern mask, which basically decides on what section I search, then do an AND with the game chunk, this gives me
+a subsection of the game that we care about, then I xor the result with the pattern. If the result is 0, then it is a full match.
+
+In equivalent C it is something like this:
+```c
+if (patt ^ (mask & game) == 0) {
+  // match
+}
+```
+
+or in ASM
+```asm
+vpand ymm0, ymm0, ymm2
+vpxor ymm0, ymm0, ymm1
+vptest ymm0, ymm0
+```
+
+Where `ymm0` contains the game at the start of the routine, `ymm1` contains the search pattern and `ymm2` contains the search mask.
+
+Since AVX2 instructions operate on 256 bits and the whole pattern is 361 bits, I need to do two times the above operation with different sections. This is the reason by I
+set the chunks to 256 bits, so these operations work on aligned 256 bits and I can linearly scan them. This also serves me well to
+store the id and 
+
+I want to test it with AVX512, but I don't have a processor that has that extension.
