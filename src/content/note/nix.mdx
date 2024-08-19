@@ -1,0 +1,65 @@
+---
+title: 'Nix Notes'
+---
+
+This is a random assortment of notes of things I learned or I keep forgetting about nix.
+
+# No space left on /boot
+
+Nix by default keeps all boot configurations in `/boot`, at some point this grows too much and you cannot `nixos-rebuild switch`.
+
+You can either clean it up by manually running `nix-collect-garbage --delete-older-than 30d` or add this to your config:
+
+```nix
+nix.gc = {
+  automatic = true;
+  persistent = true; # Catch up on GC's while computer was asleep
+  options = "--delete-older-than 30d";
+}
+```
+
+# Basic shell I use
+
+```nix
+{ pkgs ? import <nixpkgs> {} }:
+pkgs.mkShell {
+  buildInputs = with pkgs; [
+    # Runtime tools
+  ];
+
+  shellHook = ''
+  export LD_LIBRARY_PATH="#{pkgs.lib.makeLibraryPath([ <runtime libs> ])}"
+  '';
+}
+```
+
+# Use binaries precompiled for other systems
+
+Something like this:
+
+```nix
+{ pkgs ? import <nixpkgs> {} }:
+let
+  runtimeLibs = with pkgs; [ libGL stdenv.cc.cc fontconfig libxkbcommon zlib freetype libxml2 dbus xcb-util-cursor ] ++ (with xorg; [ libxcb libX11 libXcursor libXrandr libXi  ]);
+in
+pkgs.stdenv.mkDerivation {
+    name = "binaryninja-patch";
+    src = ./.;
+    phases = [ "installPhase" "fixupPhase" ];
+
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+
+    installPhase = "mkdir -p $out/bin && cp -r $src/* $out/bin/";
+
+    fixupPhase = ''
+        chmod 755 $out/bin/*
+
+        patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" \
+                         $out/bin/binaryninja
+	# patchelf --set-rpath ${pkgs.xcb-util-cursor.out}/lib/libxcb-cursor.so.0 $out/bin/libQt6XcbQpa.so.6 
+
+        wrapProgram $out/bin/binaryninja --set LD_LIBRARY_PATH \
+                         "${pkgs.lib.makeLibraryPath runtimeLibs}"
+    '';
+}
+```
