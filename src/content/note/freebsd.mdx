@@ -1,0 +1,44 @@
+---
+title: 'FreeBSD'
+---
+
+My Archival system works on FreeBSD with ArchiveBox.
+It runs on a small Vultr instance.
+
+# Setup
+
+## ZFS Archive volume
+
+Used [ZFS FreeBSD handbook](https://docs.freebsd.org/en/books/handbook/zfs/#zfs-quickstart) as reference.
+I attached a 100GB block storage, and it appeared at `/dev/vtbd1`
+
+```sh
+$ zpool create archive /dev/vtbd1
+$ zfs set compression=gzip archive
+$ df -h
+root@dziban-archive:~ # df -h
+Filesystem         Size    Used   Avail Capacity  Mounted on
+/dev/ufs/rootfs     48G    2.5G     42G     6%    /
+devfs              1.0K      0B    1.0K     0%    /dev
+archive             96G     24K     96G     0%    /archive
+```
+
+## ArchiveBox setup
+
+```sh
+$ adduser
+$ chown archivist:archivist /archive
+```
+
+```sh
+$ pkg install python git wget curl chromium yt-dlp py311-pip node www/npm ripgrep
+$ python3 -m pip install --upgrade archivebox
+$ npm install -g single-file-cli
+$ npm install -g @postlight/parser
+$ cd /archive
+$ archivebox init
+$ archivebox manage createsuperuser
+$ archivebox config --set PUBLIC_INDEX=True
+$ archivebox config --set PUBLIC_SNAPSHOTS=True
+$ archivebox config --set PUBLIC_ADD_VIEW=False
+```

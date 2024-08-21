@@ -1,0 +1,40 @@
+---
+let { text, link, archive, hn, hn_archive } = Astro.props;
+import hn_logo from '../../public/y18.svg';
+---
+
+<a href={link}>{text}</a>
+<sup>
+  { archive && <a href={archive}>[archive]</a> }
+  { hn && <a href={hn}><img src={hn_logo.src} /></a> }
+  { hn_archive && <a href={hn_archive}>[HN archive]</a> }
+</sup>
+
+<style>
+a {
+    padding: 1px 3px;
+
+    &::before {
+        content: "";
+    }
+
+    &::after {
+        content: "";
+    }
+
+    &:hover {
+        border-color: var(--accent-hl);
+    }
+}
+
+sup > a {
+    padding: 0;
+    font-size: 0.6em;
+}
+
+img {
+   border-radius: 0;
+   padding: 0;
+   width: 12px;
+}
+</style>
