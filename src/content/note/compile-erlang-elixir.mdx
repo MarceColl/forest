@@ -1,0 +1,58 @@
+---
+title: 'Compile Erlang/Elixir'
+---
+
+import L from '../../components/L.astro'
+
+
+# Erlang
+
+The general gist of it is:
+
+```
+$ wget <tarball_url>
+$ tar xzf <tarball_file> && cd <tarball_folder>
+$ ./configure --prefix=<install path> --with-dynamic-trace=dtrace --disable-year2038
+$ gmake
+```
+
+The `--with-dynamic-trace=dtrace` enables the BEAM dtrace probes.
+
+For more information you can check [here](https://beta.erlang.org/docs/26/installation_guide/install)
+
+# In Solaris/OmniOS
+
+When attempting to compile this in <L name="solaris" from="compile-erlang-elixir" /> I had the following error:
+
+```
+ GEN    /home/marce/build/otp_src_26.2.3/erts/start_scripts/start_clean.script
+Crash: error:undef
+[{systools,compile_rel,
+           ["/home/marce/build/otp_src_26.2.3/erts/start_scripts/start_clean",
+            "/home/marce/build/otp_src_26.2.3/erts/start_scripts/start_clean",
+            {options,["/home/marce/build/otp_src_26.2.3/lib/kernel/ebin",
+                      "/home/marce/build/otp_src_26.2.3/lib/stdlib/ebin",
+                      "/home/marce/build/otp_src_26.2.3/lib/sasl/ebin"],
+                     "/home/marce/build/otp_src_26.2.3/erts/start_scripts",
+                     undefined,[],1,false,999,
+                     [no_warn_sasl],
+                     [],
+                     "/home/marce/build/otp_src_26.2.3/erts/start_scripts/tmp"}],
+           []},
+ {erl_compile,compile_file,4,[{file,"erl_compile.erl"},{line,359}]},
+ {erl_compile,compile3,3,[{file,"erl_compile.erl"},{line,317}]},
+ {erl_compile,compile,2,[{file,"erl_compile.erl"},{line,61}]},
+ {erl_compile,'-compile_cmdline1/1-fun-0-',2,
+              [{file,"erl_compile.erl"},{line,74}]}]
+```
+
+This was a bit of a red herring, since this was caused by a stream of errors far above in the logs.
+Those errors were due to `/usr/ucb/install` not supporting `-p`. It seems that while the erlang
+build system defaults to `/usr/ucb/install` in solaris, it uses a flag that does not work there.
+
+Just doing a simple
+```
+$ sed -i 's|/usr/ucb/install|/usr/bin/install|g' $(grep -l /usr/ucb/install ./**/*)
+```
+
+fixed it and I could finish building.

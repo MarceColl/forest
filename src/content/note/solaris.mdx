@@ -1,0 +1,18 @@
+---
+title: 'Solaris'
+---
+
+import L from '../../components/L.astro'
+
+Today I was experimenting with installing Solaris in a Vultr VPS, the process was pretty simple,
+upload the latest iso to the ISO library, run it, most things left default.
+
+You can go to Settings > IPv4 to get the IP, netmask and gateway configuration and you are set.
+I enabled the SSH service and created an admin user.
+
+After that I wanted to run erlang/elixir in this system, it is not there in the repos so I proceeded to
+<L name="compile-erlang-elixir" from="solaris" />.
+
+## Zones
+## Dtrace
+## ZFS
