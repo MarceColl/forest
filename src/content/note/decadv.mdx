@@ -23,3 +23,186 @@ I'm currently in Japan for a month with my family (partner and 10-month old daug
 able to do. But I'll try to get things done and write about them here and there while on downtime from visiting Japan.
 
 Thanks to the Vera community on Discord for encouraging this December Adventure!
+
+# Day 1
+
+Today I've been developing a Common Lisp implementation of Vera, which I started yesterday. The idea was to leverage
+Common Lisp codegen capabilities and the fairly good SBCL compiler. With these two tools we can have a native code
+compiler working in very few lines of code.
+
+I'm gonna walk you through the current implementation, since it's just a few lines of code. I'm gonna assume that you already have
+a working Vera parser, if you don't you can use mine [here](https://git.sr.ht/~mcoll/cl-vera/tree/master/item/parser.lisp).
+
+A Vera program consists of a series of rules, each rule has two parts what is called the left hand side and the right hand side.
+When the Vera state contains the facts in the left hand side that rule triggers, those facts are removed and the facts from
+the right hand side are added to the state.
+
+For example, consider this simple rule:
+
+```
+|a, b| c
+```
+
+When `a` and `b` exist, then those are consumed and replaced by `c`, after that rule triggers we start again from the
+top of the ruleset. There is a bit more to it and you can read other posts on Vera to get a bigger picture.
+
+We are gonna write a normal Common Lisp function that does this for a very simple ruleset:
+
+```
+|| a  <- the empty rule means that it will be executed on start
+|a| b
+|b| c
+|c| d
+|d|
+```
+
+```lisp
+(defun some-ruleset ()
+  (let ((running t) (start 1) (a 0) (b 0) (c 0) (d 0))
+    (loop while running
+      do (cond
+           ((and (> start 0))
+             (decf start)
+             (incf a))
+           ((and (> a 0))
+             (decf a)
+             (incf b))
+           ((and (> b 0))
+             (decf b)
+             (incf c))
+           ((and (> c 0))
+             (decf c)
+             (incf d))
+           ((and (> d 0))
+             (decf d))
+           (t (setf running nil))))))
+```
+
+It's a fairly simple function, we initialize one counter variable for each of the facts and run a loop where we check sequentially
+if the rule matches, if it does we decrement the left hand side and increment the right hand side. If we matched no rule
+we stop the loop by setting running to false.
+
+Now that we have seen how we can write one of these functions by hand, let's look into generating it programmatically.
+
+Let's say we have a list of rules, where we have already parsed the right and left hand sides.
+
+```
+(defun codegen-vera-program (rules)
+  (let* ((unique-facts (find-unique-facts rules))
+         (running-var (gensym))
+         (counter-var (gensym)))
+    `(lambda ()
+       (let ((,running-var t) (start 1) (,counter-var 0))
+         (let ,(mapcar (lambda (k) `(,k 0)) unique-facts)
+           (loop while ,running-var
+              do (cond
+                   ,@(mapcar #'make-rule-body rules)
+                   (t (setf ,running-var nil)))))))))
+```
+
+We are basically generating a template of the function above, we first find all the unique facts that are in the vera program
+and we use that to generate the list of variables, then we create the loop and we will populate it by calling `make-rule-body`
+for each rule in the ruleset. Let's take a look at that function
+
+```
+(defun make-rule-body (rule)
+  (let ((lhs (car rule))
+        (rhs (cadr rule)))
+    `((and ,@(mapcar (lambda (fact) `(> ,fact 0)) lhs))
+      ,@(mapcar (lambda (f) `(decf ,f)) lhs)
+      ,@(mapcar (lambda (f) `(incf ,f)) rhs))))
+```
+
+In this function we generate the condition and the decrements and increments for each rule, these will be injected into the
+cond of `codegen-vera-program`.
+
+After we codegen a vera program we will have a quoted lambda expression that we can then pass to `(compile nil <expr>)` in
+order to get native code. With very little amount of lines we can now get a vera compiler that produces fairly good native
+code. This can be used for other cases when we have a custom language we wanna test out.
+
+This post leaves out some details, I've used a slightly simplified version of vera without `min` semantics (I'll expand on this
+at some other point, it's a way to execute a rule several times on the same match if we have enough values for the left hand side)
+and the real common lisp code has some extra declarations and optimizations using FIXNUMs so the compiler uses
+registers and native operations to perform arithmetic.
+
+This ruleset:
+
+```
+|a, b| c
+|c, a| d
+```
+
+Ends up being 256 bytes of arm64 machine code:
+
+```asm
+CL-USER> (disassemble 'basic-rewrite)
+; disassembly for BASIC-REWRITE
+; Size: 256 bytes. Origin: #x7008F708E4                       ; BASIC-REWRITE
+; 8E4:       AA0A40F9         LDR R0, [THREAD, #16]           ; binding-stack-pointer
+; 8E8:       4A0B00F9         STR R0, [CFP, #16]
+; 8EC:       7A0300F9         STR CFP, [CSP]
+; 8F0:       4A0F40F9         LDR R0, [CFP, #24]
+; 8F4:       2BFCFF58         LDR R1, #x7008F70878            ; '(A B)
+; 8F8:       56FBFF58         LDR LEXENV, #x7008F70860        ; #<SB-KERNEL:FDEFN HAS-KEYS>
+; 8FC:       970080D2         MOVZ NARGS, #4
+; 900:       FA031BAA         MOV CFP, CSP
+; 904:       DE9240F8         LDR LR, [LEXENV, #9]
+; 908:       C0033FD6         BLR LR
+; 90C:       3B039B9A         CSEL CSP, OCFP, CSP, EQ
+; 910:       5F011DEB         CMP R0, NULL
+; 914:       01050054         BNE L3
+; 918:       7A0300F9         STR CFP, [CSP]
+; 91C:       4A0F40F9         LDR R0, [CFP, #24]
+; 920:       0BFBFF58         LDR R1, #x7008F70880            ; '(C A)
+; 924:       F6F9FF58         LDR LEXENV, #x7008F70860        ; #<SB-KERNEL:FDEFN HAS-KEYS>
+; 928:       970080D2         MOVZ NARGS, #4
+; 92C:       FA031BAA         MOV CFP, CSP
+; 930:       DE9240F8         LDR LR, [LEXENV, #9]
+; 934:       C0033FD6         BLR LR
+; 938:       3B039B9A         CSEL CSP, OCFP, CSP, EQ
+; 93C:       5F011DEB         CMP R0, NULL
+; 940:       41020054         BNE L2
+; 944:       AB4E43F9         LDR R1, [THREAD, #1688]         ; tls: *STANDARD-OUTPUT*
+; 948:       6B00F8B6         TBZ R1, #63, L0
+; 94C:       EAF9FF58         LDR R0, #x7008F70888            ; '*STANDARD-OUTPUT*
+; 950:       4B1140F8         LDR R1, [R0, #1]
+; 954: L0:   7A0300F9         STR CFP, [CSP]
+; 958:       CAF9FF58         LDR R0, #x7008F70890            ; "No rewrite
+                                                              ; "
+; 95C:       970080D2         MOVZ NARGS, #4
+; 960:       FA031BAA         MOV CFP, CSP
+; 964:       29F880D2         MOVZ TMP, #1985
+; 968:       BE6B69F8         LDR LR, [NULL, TMP]             ; WRITE-STRING
+; 96C:       C0033FD6         BLR LR
+; 970: L1:   4A0F40F9         LDR R0, [CFP, #24]
+; 974:       B6F7FF58         LDR LEXENV, #x7008F70868        ; #<SB-KERNEL:FDEFN PRINT-COUNTERS>
+; 978:       570080D2         MOVZ NARGS, #2
+; 97C:       DE9240F8         LDR LR, [LEXENV, #9]
+; 980:       DE130091         ADD LR, LR, #4
+; 984:       C0031FD6         BR LR
+; 988: L2:   7A0300F9         STR CFP, [CSP]
+; 98C:       4A0F40F9         LDR R0, [CFP, #24]
+; 990:       8BF7FF58         LDR R1, #x7008F70880            ; '(C A)
+; 994:       2CF8FF58         LDR R2, #x7008F70898            ; '(D)
+; 998:       D6F6FF58         LDR LEXENV, #x7008F70870        ; #<SB-KERNEL:FDEFN APPLY-RULE>
+; 99C:       D70080D2         MOVZ NARGS, #6
+; 9A0:       FA031BAA         MOV CFP, CSP
+; 9A4:       DE9240F8         LDR LR, [LEXENV, #9]
+; 9A8:       C0033FD6         BLR LR
+; 9AC:       3B039B9A         CSEL CSP, OCFP, CSP, EQ
+; 9B0:       F0FFFF17         B L1
+; 9B4: L3:   7A0300F9         STR CFP, [CSP]
+; 9B8:       4A0F40F9         LDR R0, [CFP, #24]
+; 9BC:       EBF5FF58         LDR R1, #x7008F70878            ; '(A B)
+; 9C0:       0CF7FF58         LDR R2, #x7008F708A0            ; '(C)
+; 9C4:       76F5FF58         LDR LEXENV, #x7008F70870        ; #<SB-KERNEL:FDEFN APPLY-RULE>
+; 9C8:       D70080D2         MOVZ NARGS, #6
+; 9CC:       FA031BAA         MOV CFP, CSP
+; 9D0:       DE9240F8         LDR LR, [LEXENV, #9]
+; 9D4:       C0033FD6         BLR LR
+; 9D8:       3B039B9A         CSEL CSP, OCFP, CSP, EQ
+; 9DC:       E5FFFF17         B L1
+; 9E0:       E00120D4         BRK #15                         ; Invalid argument count trap
+```
+
+Getting around 750 rewrites per microsecond (or 750M per second).
